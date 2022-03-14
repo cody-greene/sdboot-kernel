@@ -1,0 +1,2 @@
+# this is empty by design:
+# disables /usr/share/libalpm/hooks/90-mkinitcpio-install.hook

@@ -1,0 +1,2 @@
+# this is empty by design:
+# disables /usr/lib/kernel/install.d/50-mkinitcpio.install

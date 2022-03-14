@@ -1,0 +1,9 @@
+[Trigger]
+Type = Path
+Operation = Remove
+Target = usr/lib/modules/*/vmlinuz
+
+[Action]
+Description = Removing orphaned boot entries...
+When = PreTransaction
+Exec = /usr/bin/sdboot-kernel remove

@@ -1,0 +1,3 @@
+# this is empty by design
+# disables /usr/lib/kernel/install.d/50-depmod.install
+# see instead /usr/share/libalpm/hooks/60-depmod.hook
