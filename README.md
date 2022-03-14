@@ -14,12 +14,6 @@ Compared to [systemd-boot-manager](https://gitlab.com/dalto.8/systemd-boot-manag
 - does not support "fallback" initrds
 - does support multi-boot scenarios, e.g. multiple installations of the same OS with the same kernel version
 
-[](https://systemd.io/BOOT_LOADER_SPECIFICATION)
-> Note: $BOOT should be considered shared among all OS installations of a
-> system. Instead of maintaining one $BOOT per installed OS (as /boot/ was
-> traditionally handled), all installed OS share the same place to drop in
-> their boot-time configuration.
-
 Example partition layout:
 ```
 +----------------------+------------------------+------------------------+
@@ -36,6 +30,7 @@ Additional information:
 - [kernel-install](https://man.archlinux.org/man/kernel-install.8.en)
 - [machine-id](https://man.archlinux.org/man/machine-id.5)
 - [systemd-boot](https://man.archlinux.org/man/systemd-boot.7)
+- [Boot Loader Specification](https://systemd.io/BOOT_LOADER_SPECIFICATION)
 
 ```
 Usage: sdboot-kernel [action]
@@ -51,6 +46,11 @@ Actions:
 
 $BOOT = EFI system partiton; /efi, /boot or /boot/efi
 ```
+
+> Note: $BOOT should be considered shared among all OS installations of a
+> system. Instead of maintaining one $BOOT per installed OS (as /boot/ was
+> traditionally handled), all installed OS share the same place to drop in
+> their boot-time configuration.
 
 After installing this package and initializing, your $BOOT partition should look like this:
 ```
