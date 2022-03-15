@@ -7,7 +7,6 @@ The package basically does a few things:
 - Overrides the mkinitcpio hooks to generate presets that work with kernel-install
 - Installs hooks to automate the installation and removal of kernels using kernel-install
 - Saves kernel options to /etc/kernel/cmdline to support recovery in a chroot
-- Installs a hook to update systemd-boot
 
 Compared to [systemd-boot-manager](https://gitlab.com/dalto.8/systemd-boot-manager) this:
 - has no global config file itself, but kernel-install is configurable (see the man page)
