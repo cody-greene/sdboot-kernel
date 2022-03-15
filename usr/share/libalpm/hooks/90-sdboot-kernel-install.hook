@@ -2,11 +2,12 @@
 Type = Path
 Operation = Install
 Operation = Upgrade
-Target = usr/lib/modules/*/vmlinuz
 Target = boot/*ucode.img
+Target = usr/lib/initcpio/*
+Target = usr/lib/modules/*/vmlinuz
 
 [Action]
 Description = Installing kernel...
 When = PostTransaction
-Exec = /usr/bin/sdboot-kernel entries
+Exec = /usr/bin/sdboot-kernel install
 NeedsTargets

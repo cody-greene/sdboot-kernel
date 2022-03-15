@@ -13,15 +13,17 @@ usage() {
   echo "Usage: sdboot-kernel [action]"
   echo ""
   echo "Actions:"
-  echo "  all      Run 'initrd' & 'entries' for all available kernels"
-  echo "  initrd   Generate presets and run mkinitcpio, placing initrd in"
-  echo "           \$BOOT/MACHINE_ID/KERNEL_VERSION/"
-  echo "  entries  Generate systemd-boot loader entries and install kernels & ucode to"
-  echo "           \$BOOT"
-  echo "  remove   Remove orphaned sdboot entries and mkinitcpio presets"
-  echo "           note: entries for other machine-ids are untouched"
+  echo "  install  Generate mkinitcpio presets and install kernels, ucode & initramfs"
+  echo "           to \$BOOT"
+  echo "  remove   Remove orphaned kernels from \$BOOT and mkinitcpio presets"
+  echo "           entries for other machine-ids are untouched"
   echo ""
   echo "\$BOOT = EFI system partiton; /efi, /boot or /boot/efi"
+  echo ""
+  echo "\$BOOT should be considered shared among all OS installations of a"
+  echo "system. Instead of maintaining one \$BOOT per installed OS (as /boot/ was"
+  echo "traditionally handled), all installed OS share the same place to drop in"
+  echo "their boot-time configuration."
   exit 1
 }
 
@@ -40,56 +42,9 @@ list_kernels() {
   done < <(find /usr/lib/modules -maxdepth 2 -type f -name vmlinuz)
 }
 
-# expects "/usr/lib/modules/*/vmlinuz" on stdin
+# expects "usr/lib/modules/*/vmlinuz" on stdin
 # otherwise searches for all installed kernels
-create_initrds() {
-  args=()
-  kernels=()
-  [[ -t 0 ]] && all=1 # true is stdin is unavailable
-
-  (( ! all )) && while read -r line; do
-    [[ "$line" != */vmlinuz ]] && { all=1; break; }
-
-    if ! read -r pkgbase > /dev/null 2>&1 < "/${line%/vmlinuz}/pkgbase"; then
-      # if the kernel has no pkgbase, we skip it
-      continue
-    fi
-
-    kernels+=("/${line}")
-    args+=(-p "${pkgbase}")
-  done
-
-  if (( all )); then
-    args=(-P)
-    list_kernels
-  fi
-
-  # create a mkinitcpio preset for each kernel
-  for kernel in "${kernels[@]}"; do
-    version=$(basename "${kernel%/vmlinuz}")
-    packagename=$(cat "${kernel%/vmlinuz}/pkgbase")
-    preset_file="/etc/mkinitcpio.d/${packagename}.preset"
-    entry_dir="${BOOT}/${MACHINE_ID}/${version}"
-
-    echo ":: Generating ${preset_file}"
-
-    mkdir -p "$entry_dir"
-
-    subst="
-      s|%ENTRY_DIR_ABS%|$entry_dir|g
-      s|%VMLINUZ%|$kernel|g
-    "
-    echo -e "$PRESET_TEMPLATE" | sed "${subst}" | install -Dm644 /dev/stdin "$preset_file"
-  done
-
-  if (( ${#args[@]} )); then
-    mkinitcpio "${args[@]}"
-  fi
-}
-
-# expects "/usr/lib/modules/*/vmlinuz" on stdin
-# otherwise searches for all installed kernels
-create_entries() {
+run_install() {
   # Set /etc/kernel/cmdline to enable kernel-install in a chroot
   # but only if it does not already exist and only if not already in a chroot
   if [[ ! -e /etc/kernel/cmdline && "$(stat -c %d:%i /)" == "$(stat -c %d:%i /proc/1/root/.)" ]]; then
@@ -110,19 +65,39 @@ create_entries() {
 
   (( ! all )) && while read -r line; do
     [[ "$line" != */vmlinuz ]] && { all=1; break; }
+
+    if ! read -r pkgbase > /dev/null 2>&1 < "/${line%/vmlinuz}/pkgbase"; then
+      # if the kernel has no pkgbase, we skip it
+      continue
+    fi
+
     kernels+=("/${line}")
   done
 
-  (( all )) && list_kernels
+  if (( all )); then
+    list_kernels
+  fi
 
   for kernel in "${kernels[@]}"; do
     version=$(basename "${kernel%/vmlinuz}")
+    packagename=$(cat "${kernel%/vmlinuz}/pkgbase")
+    preset_file="/etc/mkinitcpio.d/${packagename}.preset"
+    entry_dir="${BOOT}/${MACHINE_ID}/${version}"
+
+    echo ":: Generating ${preset_file}"
+    subst="
+      s|%ENTRY_DIR_ABS%|$entry_dir|g
+      s|%VMLINUZ%|$kernel|g
+    "
+    mkdir -p "$entry_dir"
+    echo -e "$PRESET_TEMPLATE" | sed "${subst}" | install -Dm644 /dev/stdin "$preset_file"
+
     echo ":: Running kernel-install for $version"
     kernel-install add "${version}" "${kernel}" /boot/*ucode.img initrd
   done
 }
 
-remove() {
+run_remove() {
   list_kernels
   (( ${#kernels[@]} )) &&
     expected_versions=$(basename -a "${kernels[@]%/vmlinuz}")
@@ -147,18 +122,11 @@ remove() {
 }
 
 case $1 in
-  all)
-    create_initrds
-    create_entries
-    ;;
-  initrd)
-    create_initrds
-    ;;
-  entries)
-    create_entries
+  install)
+    run_install
     ;;
   remove)
-    remove
+    run_remove
     ;;
   *)
     usage

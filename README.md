@@ -25,6 +25,8 @@ Example partition layout:
 +----------------------+------------------------+------------------------+
 ```
 
+> I recommend that you enable systemd-boot-update.service as well
+
 Additional information:
 - [kernel-install](https://man.archlinux.org/man/kernel-install.8.en)
 - [machine-id](https://man.archlinux.org/man/machine-id.5)
@@ -35,21 +37,18 @@ Additional information:
 Usage: sdboot-kernel [action]
 
 Actions:
-  all      Run 'initrd' & 'entries' for all available kernels
-  initrd   Generate presets and run mkinitcpio, placing initrd in
-           $BOOT/MACHINE_ID/KERNEL_VERSION/
-  entries  Generate systemd-boot loader entries and install kernels & ucode to
-           $BOOT
-  remove   Remove orphaned sdboot entries and mkinitcpio presets
-           note: entries for other machine-ids are untouched
+  install  Generate mkinitcpio presets and install kernels, ucode & initramfs
+           to $BOOT
+  remove   Remove orphaned kernels from $BOOT and mkinitcpio presets
+           entries for other machine-ids are untouched
 
 $BOOT = EFI system partiton; /efi, /boot or /boot/efi
-```
 
-> Note: $BOOT should be considered shared among all OS installations of a
-> system. Instead of maintaining one $BOOT per installed OS (as /boot/ was
-> traditionally handled), all installed OS share the same place to drop in
-> their boot-time configuration.
+$BOOT should be considered shared among all OS installations of a
+system. Instead of maintaining one $BOOT per installed OS (as /boot/ was
+traditionally handled), all installed OS share the same place to drop in
+their boot-time configuration.
+```
 
 After installing this package and initializing, your $BOOT partition should look like this:
 ```
@@ -57,7 +56,7 @@ $ pacman -S sdboot-kernel
 
 $ bootctl install
 
-$ sdboot-kernel all
+$ sdboot-kernel install
 
 $ find /efi -type f | sort
 /efi/${MACHINE_ID}/5.15.25-1-MANJARO/amd-ucode.img
@@ -80,8 +79,7 @@ $ find /boot -type f | sort
 ```
 
 The following hooks will run when installing a kernel:
-- /usr/share/libalpm/hooks/90-sdboot-kernel-initrd.hook
-- /usr/share/libalpm/hooks/91-sdboot-kernel-entries.hook
+- /usr/share/libalpm/hooks/90-sdboot-kernel-install.hook
 
 And when removing a kernel:
 - /usr/share/libalpm/hooks/60-sdboot-kernel-remove.hook
@@ -90,4 +88,3 @@ The following hooks from other packages are disabled:
 - /usr/share/libalpm/hooks/60-mkinitcpio-remove.hook
 - /usr/share/libalpm/hooks/90-mkinitcpio-install.hook
 - /usr/lib/kernel/install.d/50-depmod.install
-- /usr/lib/kernel/install.d/50-mkinitcpio.install
