@@ -1,4 +1,4 @@
-# sdboot-kernel
+# systemd-boot-kernel
 A package to enable systemd-boot automation using kernel-install on Arch-based distros.
 
 The kernel-install hooks were adapted from the AUR package originally written by Tilmann Meyer. Inspired by [eos-systemd-boot](https://gitlab.com/dalto.8/eos-systemd-boot)
@@ -52,8 +52,6 @@ their boot-time configuration.
 
 After installing this package and initializing, your $BOOT partition should look like this:
 ```
-$ pacman -S sdboot-kernel
-
 $ bootctl install
 
 $ sdboot-kernel install

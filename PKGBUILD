@@ -1,14 +1,19 @@
 # Maintainer: Cody Greene <cody at variable dot run>
-pkgname=sdboot-kernel
-pkgver='0.5'
+pkgname=systemd-boot-kernel
+pkgver=$(git describe --long --tags | sed "s/^v//;s/-/.r/;s/-/./")
 pkgrel=1
-pkgdesc='systemd-boot automation using kernel-install'
+pkgdesc="systemd-boot automation using kernel-install"
 arch=(any)
-url='https://github.com/cody-greene/sdboot-kernel'
+url="https://github.com/cody-greene/systemd-boot-kernel"
 license=(GPL2)
-depends=(systemd findutils grep mkinitcpio)
+depends=(findutils grep mkinitcpio systemd)
 conflicts=(systemd-boot-manager)
 
 package() {
-  cp -a ../{usr,etc} ${pkgdir}
+  cd "$startdir"
+  install -D -m755 -t "${pkgdir}/usr/bin" sdboot-kernel
+  cp -a usr etc "${pkgdir}"
 }
+
+#source=("${pkgname}-${pkgver}.tgz::https://github.com/cody-greene/systemd-boot-kernel/archive/refs/tags/v${pkgver}.tar.gz")
+#sha256sums=(SKIP)
