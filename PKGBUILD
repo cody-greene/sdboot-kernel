@@ -1,6 +1,6 @@
 # Maintainer: Cody Greene <cody at variable dot run>
 pkgname=systemd-boot-kernel
-pkgver=$(git describe --long --tags | sed "s/^v//;s/-/.r/;s/-/./")
+pkgver=$(git describe --long --tags --dirty | sed "s/^v//;s/-/.r/;s/-/./g")
 pkgrel=1
 pkgdesc="systemd-boot automation using kernel-install"
 arch=(any)

@@ -1,9 +1,10 @@
 [Trigger]
 Type = Path
 Operation = Remove
+Operation = Upgrade
 Target = usr/lib/modules/*/vmlinuz
 
 [Action]
-Description = Removing orphaned boot entries...
-When = PreTransaction
+Description = Removing orphaned kernels from ESP...
+When = PostTransaction
 Exec = /usr/bin/sdboot-kernel remove

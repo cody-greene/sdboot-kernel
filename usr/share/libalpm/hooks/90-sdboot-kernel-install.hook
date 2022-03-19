@@ -7,7 +7,7 @@ Target = usr/lib/initcpio/*
 Target = usr/lib/modules/*/vmlinuz
 
 [Action]
-Description = Installing kernel...
+Description = Installing kernel to ESP...
 When = PostTransaction
 Exec = /usr/bin/sdboot-kernel install
 NeedsTargets

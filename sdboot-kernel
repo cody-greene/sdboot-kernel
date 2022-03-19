@@ -103,22 +103,28 @@ run_remove() {
     expected_versions=$(basename -a "${kernels[@]%/vmlinuz}")
   expected_pkgbases=""
   for kernel in "${kernels[@]}"; do
-    expected_pkgbases+=$(cat "${kernel%/vmlinuz}/pkgbase")"\n"
+    expected_pkgbases+=$(cat "${kernel%/vmlinuz}/pkgbase")$'\n'
   done
 
   # remove orphaned kernels from $BOOT
-  while read -r dir; do
+  for dir in "${BOOT}/${MACHINE_ID}"/*; do
+    [[ -d "$dir" ]] || continue
     actual=$(basename "$dir")
     grep -Fxq "$actual" <<<"$expected_versions" || {
+      echo ":: Removing ${actual}"
       kernel-install remove "${actual}"
     }
-  done < <(find "${BOOT}/${MACHINE_ID}" -maxdepth 1 -type d)
+  done
 
   # remove orphaned presets
-  while read -r file; do
+  for file in /etc/mkinitcpio.d/*.preset; do
+    [[ -f "$file" ]] || continue
     actual=$(basename "$file" .preset)
-    grep -Fxq "$actual" <<<"$expected_pkgbases" || rm "$file"
-  done < <(find /etc/mkinitcpio.d -maxdepth 1 -type f -name '*.preset')
+    grep -Fxq "$actual" <<<"$expected_pkgbases" || {
+      echo ":: Removing ${file}"
+      rm -f "$file"
+    }
+  done
 }
 
 case $1 in

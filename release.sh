@@ -54,7 +54,8 @@ grease() {
 
 grease aurfiles aur "v${VERSION}"
 git tag "v${VERSION}"
-echo "Tagged HEAD as v${VERSION}"
 
-# push tag to gh
-# push aurfile to aur
+echo "Tagged HEAD as v${VERSION}"
+echo "Finalize with:"
+echo "  git push upstream HEAD:master v${VERSION}"
+echo "  git push aur aurfiles:master"
