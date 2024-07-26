@@ -1,4 +1,6 @@
 # systemd-boot-kernel
+ARCHIVED - never added to the aur
+
 A package to enable systemd-boot automation using kernel-install on Arch-based distros.
 
 The kernel-install hooks were adapted from the AUR package originally written by Tilmann Meyer. Inspired by [eos-systemd-boot](https://gitlab.com/dalto.8/eos-systemd-boot)
